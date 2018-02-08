@@ -11,26 +11,31 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+function error_control(int error){
+   if(error){
+        printf(" Socket error %d \n", errno);
+        exit(EXIT_FAILURE);
+    } 
+}
+
 int main() {
     struct protoent *protoent;
     struct sockaddr_in client_address, server_address;
-    unsigned short port = 12345u;
-    int enable = 1;
-    socklen_t client_len;
+    unsigned short port = 1500u;
+    int is_enable = 1;
+    socklen_t client_lenght;
     ssize_t nbytes_read;
-    int newline_found = 0;
+    int newline = 0;
     char buffer[BUFSIZ];
     int i;
-    int server_socket, client_sockfd;
+    int server_socket, client_socket;
     
     protoent = getprotobyname("tcp");
     server_socket = socket(AF_INET, SOCK_STREAM, protoent->p_proto);
-    if(errno){
-        printf(" Socket error %d \n", errno);
-        exit(EXIT_FAILURE);
-    }
-    
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+    error_control(errno);
+
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &is_enable, sizeof(is_enable));
+    error_control(errno);
    
     if(errno){
         printf(" Socket error %d \n", errno);
@@ -38,43 +43,33 @@ int main() {
     }
     
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address.sin_addr.s_addr = htonl(port);
     server_address.sin_port = htons(port);
     
-   bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
+    bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
+    error_control(errno);
     
-   listen(server_socket, 5);
+    listen(server_socket, 5);
+    error_control(errno);
     
-   if(errno){
-        printf(" Socket error %d \n", errno);
-        exit(EXIT_FAILURE);
-    }     
-
-    fprintf(stderr, "listening on port %d\n", port);
+    fprintf(stderr, "Listening on port %d\n", port);
     
-    while (1) {
-        client_len = sizeof(client_address);
-        client_sockfd = accept(
-            server_socket,
-            (struct sockaddr*)&client_address,
-            &client_len
-        );
-        if(errno){
-            printf(" Socket clienterror %d \n", errno);
-            exit(EXIT_FAILURE);
-        }
-        while ((nbytes_read = read(client_sockfd, buffer, BUFSIZ)) > 0) {
-            printf("received:\n");
+    while (!errno) {
+        client_lenght = sizeof(client_address);
+        client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_lenght);
+        
+        while ((nbytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
+            printf("New message:\n");
             write(STDOUT_FILENO, buffer, nbytes_read);
             if (buffer[nbytes_read - 1] == '\n')
-                newline_found;
+                newline;
             for (i = 0; i < nbytes_read - 1; i++)
                 buffer[i]++;
             write(client_sockfd, buffer, nbytes_read);
-            if (newline_found)
+            if (newline)
                 break;
         }
-        close(client_sockfd);
+        close(client_socket);
     }
     
     return 0;
