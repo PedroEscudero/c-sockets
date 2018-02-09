@@ -29,6 +29,7 @@ int main() {
     ssize_t nbytes_read;
     int newline = 0;
     char buffer[BUFSIZ];
+    int i;
     int server_socket, client_socket;
     
     protoent = getprotobyname("tcp");
@@ -59,7 +60,7 @@ int main() {
             write(STDOUT_FILENO, buffer, nbytes_read);
             if (buffer[nbytes_read - 1] == '\n')
                 newline;
-            for (int i = 0; i < nbytes_read - 1; i++)
+            for (i = 0; i < nbytes_read - 1; i++)
                 buffer[i]++;
             write(client_socket, buffer, nbytes_read);
             if (newline)
