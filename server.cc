@@ -19,46 +19,53 @@ void error_control(int error){
         exit(EXIT_FAILURE);
     } 
 }
+class Http_Socket{
+    public:
+    int socket_identifier;
+    unsigned short port;
+    Http_Socket(unsigned short);
+    int open_http_socket(){
+        struct protoent *protoent;
+        struct sockaddr_in server_address;
+        int is_enable = 1;
+        int server_socket;
 
-int open_http_socket(unsigned short port){
-    struct protoent *protoent;
-    struct sockaddr_in server_address;
-    int is_enable = 1;
-    int server_socket;
-    
-    protoent = getprotobyname("tcp");
-    server_socket = socket(AF_INET, SOCK_STREAM, protoent->p_proto);
-    error_control(errno);
+        protoent = getprotobyname("tcp");
+        server_socket = socket(AF_INET, SOCK_STREAM, protoent->p_proto);
+        error_control(errno);
 
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &is_enable, sizeof(is_enable));
-    error_control(errno);
-    
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(port);
-    
-    bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
-    error_control(errno);
-    
-    listen(server_socket, 5);
-    error_control(errno);
-    
-    return server_socket; 
+        setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &is_enable, sizeof(is_enable));
+        error_control(errno);
+
+        server_address.sin_family = AF_INET;
+        server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+        server_address.sin_port = htons(port);
+
+        bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
+        error_control(errno);
+
+        listen(server_socket, 5);
+        error_control(errno);
+
+        return server_socket; 
+    }
+};
+
+Http_Socket::Http_Socket(unsigned short a){
+    port = a;
 }
 
 int main() {
-    //struct protoent *protoent;
     struct sockaddr_in client_address;
     unsigned short port = 1500u;
-
     socklen_t client_lenght;
     ssize_t bytes_read;
     int newline = 0;
     char buffer[BUFSIZ];
     int client_socket, server_socket;
+    Http_Socket http_socket(port);
     
-    server_socket = open_http_socket (port);
-    
+    server_socket = http_socket.open_http_socket(); 
     fprintf(stderr, "Listening on port %d \n", port);
     
     while (!errno) {
