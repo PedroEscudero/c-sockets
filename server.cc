@@ -26,10 +26,9 @@ int main() {
     unsigned short port = 1500u;
     int is_enable = 1;
     socklen_t client_lenght;
-    ssize_t nbytes_read;
+    ssize_t bytes_read;
     int newline = 0;
     char buffer[BUFSIZ];
-    int i;
     int server_socket, client_socket;
     
     protoent = getprotobyname("tcp");
@@ -55,14 +54,14 @@ int main() {
         client_lenght = sizeof(client_address);
         client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_lenght);
         
-        while ((nbytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
+        while ((bytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
             cout << "New message: \n";
-            write(STDOUT_FILENO, buffer, nbytes_read);
-            if (buffer[nbytes_read - 1] == '\n')
+            write(STDOUT_FILENO, buffer, bytes_read);
+            if (buffer[bytes_read - 1] == '\n')
                 newline;
-            for (i = 0; i < nbytes_read - 1; i++)
+            for (int i = 0; i < bytes_read - 1; i++)
                 buffer[i]++;
-            write(client_socket, buffer, nbytes_read);
+            write(client_socket, buffer, bytes_read);
             if (newline)
                 break;
         }
