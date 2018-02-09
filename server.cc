@@ -20,16 +20,11 @@ void error_control(int error){
     } 
 }
 
-int main() {
+int open_http_socket(unsigned short port){
     struct protoent *protoent;
-    struct sockaddr_in client_address, server_address;
-    unsigned short port = 1500u;
+    struct sockaddr_in server_address;
     int is_enable = 1;
-    socklen_t client_lenght;
-    ssize_t bytes_read;
-    int newline = 0;
-    char buffer[BUFSIZ];
-    int server_socket, client_socket;
+    int server_socket;
     
     protoent = getprotobyname("tcp");
     server_socket = socket(AF_INET, SOCK_STREAM, protoent->p_proto);
@@ -47,6 +42,22 @@ int main() {
     
     listen(server_socket, 5);
     error_control(errno);
+    
+    return server_socket; 
+}
+
+int main() {
+    //struct protoent *protoent;
+    struct sockaddr_in client_address;
+    unsigned short port = 1500u;
+
+    socklen_t client_lenght;
+    ssize_t bytes_read;
+    int newline = 0;
+    char buffer[BUFSIZ];
+    int client_socket, server_socket;
+    
+    server_socket = open_http_socket (port);
     
     fprintf(stderr, "Listening on port %d \n", port);
     
