@@ -15,7 +15,7 @@ using namespace std;
 
 void error_control(int error){
    if(error){
-        printf(" Socket error %d \n", errno);
+        cout << " Socket error" << errno;
         exit(EXIT_FAILURE);
     } 
 }
@@ -56,7 +56,7 @@ int main() {
         client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_lenght);
         
         while ((nbytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
-            printf("New message: \n");
+            cout << "New message: \n";
             write(STDOUT_FILENO, buffer, nbytes_read);
             if (buffer[nbytes_read - 1] == '\n')
                 newline;
