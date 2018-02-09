@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-function error_control(int error){
+void error_control(int error){
    if(error){
         printf(" Socket error %d \n", errno);
         exit(EXIT_FAILURE);
@@ -36,14 +36,9 @@ int main() {
 
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &is_enable, sizeof(is_enable));
     error_control(errno);
-   
-    if(errno){
-        printf(" Socket error %d \n", errno);
-        exit(EXIT_FAILURE);
-    }
     
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(port);
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
     server_address.sin_port = htons(port);
     
     bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
@@ -65,7 +60,7 @@ int main() {
                 newline;
             for (i = 0; i < nbytes_read - 1; i++)
                 buffer[i]++;
-            write(client_sockfd, buffer, nbytes_read);
+            write(client_socket, buffer, nbytes_read);
             if (newline)
                 break;
         }
