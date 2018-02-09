@@ -11,6 +11,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+using namespace std;
+
 void error_control(int error){
    if(error){
         printf(" Socket error %d \n", errno);
@@ -27,7 +29,6 @@ int main() {
     ssize_t nbytes_read;
     int newline = 0;
     char buffer[BUFSIZ];
-    int i;
     int server_socket, client_socket;
     
     protoent = getprotobyname("tcp");
@@ -47,18 +48,18 @@ int main() {
     listen(server_socket, 5);
     error_control(errno);
     
-    fprintf(stderr, "Listening on port %d\n", port);
+    fprintf(stderr, "Listening on port %d \n", port);
     
     while (!errno) {
         client_lenght = sizeof(client_address);
         client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_lenght);
         
         while ((nbytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
-            printf("New message:\n");
+            printf("New message: \n");
             write(STDOUT_FILENO, buffer, nbytes_read);
             if (buffer[nbytes_read - 1] == '\n')
                 newline;
-            for (i = 0; i < nbytes_read - 1; i++)
+            for (int i = 0; i < nbytes_read - 1; i++)
                 buffer[i]++;
             write(client_socket, buffer, nbytes_read);
             if (newline)
