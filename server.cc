@@ -78,6 +78,7 @@ class Http_Socket{
     int server_socket;
     unsigned short port;
     Http_Socket(unsigned short);  
+    
     void listen(){
         this->open();
         this->listen_in_loop();    
@@ -96,6 +97,5 @@ int main() {
     
     http_socket.listen();
     fprintf(stderr, "Listening on port %d \n", port);
-    
     return 0;
 }
