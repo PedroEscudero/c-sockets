@@ -22,11 +22,6 @@ class Http_Socket{
         } 
     }
     
-    public:
-    int server_socket;
-    unsigned short port;
-    Http_Socket(unsigned short);
-    
     int open(){   
         
         struct protoent *protoent;
@@ -47,7 +42,7 @@ class Http_Socket{
         bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address));
         error_control(errno);
 
-        listen(server_socket, 5);
+        ::listen(server_socket, 5);
         error_control(errno);
 
         return server_socket; 
@@ -68,8 +63,6 @@ class Http_Socket{
             while ((bytes_read = read(client_socket, buffer, BUFSIZ)) > 0) {
                 cout << "New message: \n";
                 write(STDOUT_FILENO, buffer, bytes_read);
-                if (buffer[bytes_read - 1] == '\n')
-                    //newline;
                 for (int i = 0; i < bytes_read - 1; i++)
                     buffer[i]++;
                 write(client_socket, buffer, bytes_read);
@@ -79,6 +72,15 @@ class Http_Socket{
             close(client_socket);
         }
       return 0;  
+    }
+    
+    public:
+    int server_socket;
+    unsigned short port;
+    Http_Socket(unsigned short);  
+    void listen(){
+        this->open();
+        this->listen_in_loop();    
     }
 };
 
@@ -92,10 +94,8 @@ int main() {
     int server_socket;
     Http_Socket http_socket(port);
     
-    http_socket.open(); 
+    http_socket.listen();
     fprintf(stderr, "Listening on port %d \n", port);
-    
-    http_socket.listen_in_loop();
     
     return 0;
 }
